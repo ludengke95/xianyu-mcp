@@ -15,8 +15,8 @@ func main() {
 		port     string
 	)
 
-	flag.BoolVar(&headless, "headless", true, "是否无头模式")
-	flag.StringVar(&binPath, "bin", "", "浏览器二进制文件路径")
+	flag.BoolVar(&headless, "headless", false, "是否无头模式")
+	flag.StringVar(&binPath, "bin", "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", "浏览器二进制文件路径")
 	flag.StringVar(&port, "port", ":18061", "服务端口")
 	flag.Parse()
 

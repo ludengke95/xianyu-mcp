@@ -48,12 +48,13 @@ type ConversationMessage struct {
 }
 
 type ConversationDetail struct {
-	Username       string                `json:"username"`
-	Alias          string                `json:"alias,omitempty"`
-	UserID         string                `json:"user_id,omitempty"`
-	ProductContext ProductContext        `json:"product_context"`
-	OrderStatus    string                `json:"order_status"`
-	Messages       []ConversationMessage `json:"messages"`
+	Username        string                `json:"username"`
+	Alias           string                `json:"alias,omitempty"`
+	UserID          string                `json:"user_id,omitempty"`
+	ProductContext  ProductContext        `json:"product_context"`
+	OrderStatus     string                `json:"order_status"`
+	Messages        []ConversationMessage `json:"messages"`
+	DebugStatusText string                `json:"debug_status_text,omitempty"` // 调试用：状态判断的原始文本
 }
 
 func NewMessageAction(page *rod.Page) *MessageAction {
@@ -120,7 +121,7 @@ func (a *MessageAction) ListConversations(ctx context.Context, limit int) (conve
 				if (!txt) return '未下单';
 				if (txt.includes('买家已确认收货') || txt.includes('交易成功')) return '已收货';
 				if (txt.includes('你已发货') || txt.includes('我已发货') || txt.includes('发货凭证')) return '我已发货';
-				if (txt.includes('我已付款') || txt.includes('等待你发货') || txt.includes('我已拍下') || txt.includes('待付款') || txt.includes('待发货')) return '已拍下';
+				if (txt.includes('我已付款') || txt.includes('等待卖家发货') || txt.includes('等待你发货') || txt.includes('我已拍下') || txt.includes('待付款') || txt.includes('待发货')) return '已拍下';
 				return '未下单';
 			};
 
@@ -243,7 +244,7 @@ func (a *MessageAction) GetConversationByUsername(ctx context.Context, username 
 			if (!txt) return '未下单';
 			if (txt.includes('买家已确认收货') || txt.includes('交易成功')) return '已收货';
 			if (txt.includes('你已发货') || txt.includes('我已发货') || txt.includes('发货凭证')) return '我已发货';
-			if (txt.includes('我已付款') || txt.includes('等待你发货') || txt.includes('我已拍下') || txt.includes('待付款') || txt.includes('待发货')) return '已拍下';
+			if (txt.includes('我已付款') || txt.includes('等待你发货') || txt.includes('我已拍下') || txt.includes('待付款') || txt.includes('待发货') || txt.includes('等待卖家发货')) return '已拍下';
 			return '未下单';
 		};
 
@@ -331,8 +332,11 @@ func (a *MessageAction) GetConversationByUsername(ctx context.Context, username 
 			});
 		}
 
-		const statusTextRaw = clean(document.body?.innerText || '').slice(0, 5000);
-		detail.order_status = normalizeOrderStatus(statusTextRaw);
+		// 用 product_context.location 判断订单状态
+		if (detail.product_context.location) {
+			detail.order_status = normalizeOrderStatus(detail.product_context.location);
+			detail.debug_status_text = detail.product_context.location;
+		}
 
 		const refParts = [
 			detail.product_context.title,

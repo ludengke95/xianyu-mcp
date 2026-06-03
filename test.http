@@ -1,0 +1,17 @@
+### 查询品类
+GET http://127.0.0.1:18061/api/v1/my/items
+
+### 查询消息
+GET http://127.0.0.1:18061/api/v1/im/messages?username=%E6%9C%A8%E7%94%B1%E7%9A%84%E9%97%B2%E7%BD%AE&limit=30
+
+### 发货
+POST http://127.0.0.1:18061/api/v1/orders/ship
+Content-Type: application/json
+
+{
+	"username": "木由的闲置"
+}
+
+
+### 新增事件
+GET http://127.0.0.1:18061/api/v1/im/events?since_id=0&limit=50&scan_limit=30
